@@ -158,10 +158,19 @@ resource "azurerm_frontdoor" "rg1" {
 #storage account
 resource "azurerm_storage_account" "example" {
   name                     = "storageaccountname"
-  resource_group_name      = azurerm_resource_group.example.name
-  location                 = azurerm_resource_group.example.location
+  resource_group_name      = azurerm_resource_group.rg1.name
+  location                 = "West Europe"
   account_tier             = "Standard"
   account_replication_type = "GRS"
+  account_kind		   = "BlobStorage"
+  account_tier		   = "Premium"
+  account_replication_type = "GZRS"
+  access_tier              = "Hot"
+
+  delete_retention_policy{
+    days="14"
+}
+  versioning_enabled       = "True"
 
   tags = {
     environment = "staging"
