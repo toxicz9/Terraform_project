@@ -17,6 +17,17 @@ provider "azurerm" {
 resource "azurerm_resource_group" "rg1" {
   name     = "myTFResourceGroup"
   location = "westeu"
+}
+resource "azurerm_resource_group" "example" {
+  name     = "example-rg"
+  location = "West Europe"
+}
+
+resource "azurerm_web_application_firewall_policy" "example" {
+  name                = "example-wafpolicy"
+  resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_resource_group.example.location
+
   custom_rules {
     name      = "Rule1"
     priority  = 1
@@ -98,4 +109,3 @@ resource "azurerm_resource_group" "rg1" {
   }
 
 }
-
