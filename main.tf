@@ -14,14 +14,14 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "rg" {
+resource "azurerm_resource_group" "rg1" {
   name     = "myTFResourceGroup"
   location = "westeu"
 }
 
 #WAF
 
-resource "azurerm_web_application_firewall_policy" "example" {
+resource "azurerm_resource_group" "rg" {
   name                = "example-wafpolicy"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
