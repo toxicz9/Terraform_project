@@ -17,15 +17,6 @@ provider "azurerm" {
 resource "azurerm_resource_group" "rg1" {
   name     = "myTFResourceGroup"
   location = "westeu"
-}
-
-#WAF
-
-resource "azurerm_resource_group" "rg" {
-  name                = "example-wafpolicy"
-  resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
-
   custom_rules {
     name      = "Rule1"
     priority  = 1
