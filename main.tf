@@ -1,3 +1,4 @@
+
 # Configure the Azure provider
 terraform {
   required_providers {
@@ -14,14 +15,16 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "rg1" {
+resource "azurerm_resource_group1" "rg1" {
   name     = "myTFResourceGroup"
   location = "West Europe"
 }
 
+
+#waf
 resource "azurerm_web_application_firewall_policy" "rg1" {
   name                = "example-wafpolicy"
-  resource_group_name = azurerm_resource_group.rg1
+  resource_group_name = azurerm_resource_group.rg1.name
   location            = "West Europe"
 
   custom_rules {
@@ -104,4 +107,63 @@ resource "azurerm_web_application_firewall_policy" "rg1" {
     }
   }
 
+}
+
+#frontdoor
+
+resource "azurerm_frontdoor" "rg1" {
+  name                                         = "example-FrontDoor"
+  location                                     = "West Europe"
+  resource_group_name                          = azurerm_resource_group.example.name
+  enforce_backend_pools_certificate_name_check = false
+
+  routing_rule {
+    name               = "exampleRoutingRule1"
+    accepted_protocols = ["Http", "Https"]
+    patterns_to_match  = ["/*"]
+    frontend_endpoints = ["exampleFrontendEndpoint1"]
+    forwarding_configuration {
+      forwarding_protocol = "MatchRequest"
+      backend_pool_name   = "exampleBackendBing"
+    }
+  }
+
+  backend_pool_load_balancing {
+    name = "exampleLoadBalancingSettings1"
+  }
+
+  backend_pool_health_probe {
+    name = "exampleHealthProbeSetting1"
+  }
+
+  backend_pool {
+    name = "exampleBackendBing"
+    backend {
+      host_header = "www.bing.com"
+      address     = "www.bing.com"
+      http_port   = 80
+      https_port  = 443
+    }
+
+    load_balancing_name = "exampleLoadBalancingSettings1"
+    health_probe_name   = "exampleHealthProbeSetting1"
+  }
+
+  frontend_endpoint {
+    name      = "exampleFrontendEndpoint1"
+    host_name = "example-FrontDoor.azurefd.net"
+  }
+}
+
+#storage account
+resource "azurerm_storage_account" "example" {
+  name                     = "storageaccountname"
+  resource_group_name      = azurerm_resource_group.example.name
+  location                 = azurerm_resource_group.example.location
+  account_tier             = "Standard"
+  account_replication_type = "GRS"
+
+  tags = {
+    environment = "staging"
+  }
 }
