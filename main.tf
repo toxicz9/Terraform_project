@@ -156,12 +156,10 @@ resource "azurerm_frontdoor" "rg1" {
 }
 
 #storage account
-resource "azurerm_storage_account" "example" {
+resource "azurerm_storage_account" "rg1" {
   name                     = "storageaccountname"
   resource_group_name      = azurerm_resource_group.rg1.name
   location                 = "West Europe"
-  account_tier             = "Standard"
-  account_replication_type = "GRS"
   account_kind		   = "BlobStorage"
   account_tier		   = "Premium"
   account_replication_type = "GZRS"
@@ -174,5 +172,60 @@ resource "azurerm_storage_account" "example" {
 
   tags = {
     environment = "staging"
+  }
+}
+#sql server
+resource "azurerm_sql_server" "rg1" {
+  name                         = "mssqlserver"
+  resource_group_name          = azurerm_resource_group.rg1.name
+  location                     = "West Europe"
+  version                      = "12.0"
+  administrator_login          = "mradministrator"
+  administrator_login_password = "thisIsDog11"
+
+  extended_auditing_policy {
+    storage_endpoint                        = azurerm_storage_account.example.primary_blob_endpoint
+    storage_account_access_key              = azurerm_storage_account.example.primary_access_key
+    storage_account_access_key_is_secondary = true
+    retention_in_days                       = 14
+  }
+
+  tags = {
+    environment = "production"
+  }
+}
+
+#elastic pool
+
+resource "azurerm_sql_elasticpool" "rg1" {
+  name                = "test"
+  resource_group_name = azurerm_resource_group.rg1.name
+  location            = "West Europe"
+  server_name         = azurerm_sql_server.rg1.name
+  edition             = "Basic"
+  dtu                 = 50
+  db_dtu_min          = 0
+  db_dtu_max          = 5
+  pool_size           = 5000
+}
+#sql database
+resource "azurerm_sql_database" "rg1" {
+  name                = "myexamplesqldatabase"
+  resource_group_name = azurerm_resource_group.rg1.name
+  location            = "West Europe"
+  server_name         = azurerm_sql_server.rg1.name
+
+  extended_auditing_policy {
+    storage_endpoint                        = azurerm_storage_account.example.primary_blob_endpoint
+    storage_account_access_key              = azurerm_storage_account.example.primary_access_key
+    storage_account_access_key_is_secondary = true
+    retention_in_days                       = 14
+    elastic_pool_name                       = "test"
+  }
+
+
+
+  tags = {
+    environment = "production"
   }
 }
